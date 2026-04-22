@@ -1,0 +1,6 @@
+{
+    "name": "chonkie-skills",
+    "description": "Provides access to the Chonkie Skills for text chunking, documentation search, and embeddings.",
+    "version": "1.0.0",
+    "contextFileName": "agents/AGENTS.md"
+}

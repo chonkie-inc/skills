@@ -1,0 +1,23 @@
+{
+  "name": "chonkie-skills",
+  "description": "Agent Skills for text chunking, offline documentation search, and unified embeddings using Chonkie, Mandex, and Catsu",
+  "version": "1.0.0",
+  "author": {
+    "name": "Chonkie Inc"
+  },
+  "homepage": "https://github.com/chonkie-inc",
+  "repository": "https://github.com/chonk-lain/skills",
+  "license": "MIT",
+  "keywords": [
+    "chonkie",
+    "chunking",
+    "rag",
+    "embeddings",
+    "mandex",
+    "catsu",
+    "vector-database",
+    "document-ingestion",
+    "text-splitting",
+    "documentation"
+  ]
+}

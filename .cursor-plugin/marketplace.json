@@ -1,0 +1,30 @@
+{
+  "name": "chonkie-skills",
+  "owner": {
+    "name": "Chonkie Inc"
+  },
+  "metadata": {
+    "description": "Agent Skills for text chunking, offline documentation search, and unified embeddings using Chonkie, Mandex, and Catsu",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "chonkie",
+      "source": "./skills/chonkie",
+      "skills": "./",
+      "description": "Fast, lightweight text chunking for RAG pipelines. 11 chunker types (Token, Fast, Sentence, Recursive, Semantic, Late, Code, Neural, Slumber, Table, TeraflopAI), Pipeline API for end-to-end ingestion workflows, embeddings refineries, and vector DB integrations (Chroma, Qdrant, Pinecone, Weaviate, and more)."
+    },
+    {
+      "name": "mandex",
+      "source": "./skills/mandex",
+      "skills": "./",
+      "description": "Offline documentation packages for AI agents. Pull searchable docs from CDN, full-text search with BM25 + ONNX semantic reranking, build custom .mandex packages from markdown, and auto-sync project dependency docs. 36+ packages across npm, pip, and cargo ecosystems."
+    },
+    {
+      "name": "catsu",
+      "source": "./skills/catsu",
+      "skills": "./",
+      "description": "Unified embedding API client for 11 providers (OpenAI, VoyageAI, Cohere, Jina, Mistral, Gemini, and more) through a single interface. Built-in retry logic, cost tracking, model discovery, Matryoshka dimension reduction, and async support. Python and Rust."
+    }
+  ]
+}
