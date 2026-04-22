@@ -33,9 +33,9 @@ docs = (Pipeline()
 )
 ```
 
-## Pattern 3: High-Quality Semantic Pipeline
+## Pattern 3: High-Quality Semantic Pipeline with Overlap Context
 
-Use semantic chunking with overlap for best retrieval:
+SemanticChunker has no built-in overlap — use OverlapRefinery to add surrounding context:
 
 ```python
 from chonkie import Pipeline
@@ -47,11 +47,34 @@ docs = (Pipeline()
         chunk_size=512,
         similarity_window=3,
     )
-    .refine_with("overlap", context_size=64)
+    .refine_with("overlap", context_size=64, method="suffix")  # append start of next chunk
     .refine_with("embeddings", embedding_model="openai:text-embedding-3-small")
     .export_with("json", file="semantic_chunks.json")
     .run(texts=documents, show_progress=True)
 )
+```
+
+## Pattern 3b: Overlap as Separate Context (Not Merged)
+
+Store overlap context in `chunk.context` without changing `chunk.text`:
+
+```python
+from chonkie import RecursiveChunker
+from chonkie.refinery import OverlapRefinery
+
+chunker = RecursiveChunker(chunk_size=512)
+chunks = chunker(text)
+
+refinery = OverlapRefinery(
+    context_size=0.25,     # 25% of each chunk's token count
+    method="prefix",       # prepend end of previous chunk
+    merge=False,           # keep context separate from chunk.text
+)
+refined = refinery(chunks)
+
+for chunk in refined:
+    print(chunk.text)       # original text, unchanged
+    print(chunk.context)    # surrounding context, or None for first chunk
 ```
 
 ## Pattern 4: Markdown + Tables Pipeline
@@ -66,6 +89,7 @@ docs = (Pipeline()
     .process_with("markdown")
     .chunk_with("table", chunk_size=2048)
     .chunk_with("recursive", chunk_size=512)
+    .refine_with("overlap", context_size=64, method="suffix")
     .refine_with("embeddings", embedding_model="openai:text-embedding-3-small")
     .store_in("pinecone", index_name="docs", namespace="prod")
     .run(show_progress=True)

@@ -86,11 +86,14 @@ batch_results = chunker(["doc1...", "doc2...", "doc3..."], show_progress=True)
 
 ```python
 from chonkie import TokenChunker
+
+# chunk_overlap accepts int (exact tokens) or float (fraction of chunk_size)
 chunker = TokenChunker(chunk_size=512, chunk_overlap=64)
+chunker = TokenChunker(chunk_size=512, chunk_overlap=0.1)  # 10% = 51 tokens
 chunks = chunker(text)
 ```
 
-Best for: Simple, predictable chunk sizes. Baseline chunking.
+Best for: Simple, predictable chunk sizes. Baseline chunking. One of only two chunkers with built-in `chunk_overlap`.
 
 ### FastChunker — SIMD byte-level (~100 GB/s)
 
@@ -100,7 +103,7 @@ chunker = FastChunker(chunk_size=512)
 chunks = chunker(text)
 ```
 
-Best for: Maximum throughput on large corpora. Uses Rust SIMD acceleration.
+Best for: Maximum throughput on large corpora. Uses Rust SIMD acceleration. No built-in overlap — use `OverlapRefinery` after chunking.
 
 ### SentenceChunker — Sentence-boundary aware
 
@@ -108,12 +111,13 @@ Best for: Maximum throughput on large corpora. Uses Rust SIMD acceleration.
 from chonkie import SentenceChunker
 chunker = SentenceChunker(
     chunk_size=512,
+    chunk_overlap=64,            # optional, int token overlap
     min_sentences_per_chunk=1,
 )
 chunks = chunker(text)
 ```
 
-Best for: Natural language documents where sentence integrity matters.
+Best for: Natural language documents where sentence integrity matters. One of only two chunkers with built-in `chunk_overlap`.
 
 ### RecursiveChunker — Hierarchical splitting (recommended default)
 
@@ -320,6 +324,78 @@ docs = pipeline.run(texts=["..."])
 | **Refine** | `.refine_with("overlap" \| "embeddings", ...)` | Post-chunk processing |
 | **Export** | `.export_with("json" \| "datasets", ...)` | Save to file or HF datasets |
 | **Store** | `.store_in("chroma" \| "qdrant" \| "pinecone" \| ...)` | Vector DB ingestion |
+
+## Overlap and Context
+
+Chonkie has two distinct mechanisms for adding surrounding context to chunks. Understanding the difference is important.
+
+### Built-in `chunk_overlap` (chunking-time)
+
+Only **TokenChunker** and **SentenceChunker** support a `chunk_overlap` parameter. This creates actual overlapping token windows during chunking — adjacent chunks share content at their boundaries.
+
+```python
+from chonkie import TokenChunker
+
+chunker = TokenChunker(chunk_size=512, chunk_overlap=64)
+chunks = chunker(text)
+# Chunk N ends at token 512, Chunk N+1 starts at token 448 (512-64)
+```
+
+- `int` value: exact token count overlap
+- `float` value (0-1): fraction of `chunk_size` (e.g., `0.1` = 10%)
+- Affects `start_index`/`end_index` — chunks genuinely overlap in the source text
+
+All other chunkers (Recursive, Semantic, Code, Fast, Neural, Slumber, Table, Late, TeraflopAI) do **not** have built-in overlap. Use the OverlapRefinery instead.
+
+### OverlapRefinery (post-chunking)
+
+Adds surrounding context to chunks **after** they've been created by any chunker. This is the recommended approach for all chunkers.
+
+```python
+from chonkie import RecursiveChunker
+from chonkie.refinery import OverlapRefinery
+
+chunker = RecursiveChunker(chunk_size=512)
+chunks = chunker(text)
+
+refinery = OverlapRefinery(
+    context_size=128,         # int (exact tokens) or float (fraction of chunk token_count)
+    method="suffix",          # "suffix" (default) or "prefix"
+    mode="token",             # "token" (default) or "recursive"
+    merge=True,               # True: append/prepend to chunk.text; False: store in chunk.context only
+    inplace=True,             # modify chunks in place
+)
+refined = refinery(chunks)
+```
+
+**Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `context_size` | int or float | 0.25 | Tokens of context to add. Float (0-1) = fraction of chunk's token_count |
+| `method` | `"suffix"` or `"prefix"` | `"suffix"` | `suffix`: appends start of next chunk. `prefix`: prepends end of previous chunk |
+| `mode` | `"token"` or `"recursive"` | `"token"` | `token`: exact token slicing. `recursive`: split at logical boundaries (delimiters) |
+| `merge` | bool | True | If True, context is merged into `chunk.text` and `token_count` is updated. If False, context is stored in `chunk.context` field only |
+| `inplace` | bool | True | Modify chunks in place or return copies |
+
+**Suffix method** (default): takes the first N tokens of the *next* chunk and appends them to the current chunk — provides "what comes after" context.
+
+**Prefix method**: takes the last N tokens of the *previous* chunk and prepends them to the current chunk — provides "what came before" context.
+
+When `merge=False`, `chunk.text` and `start_index`/`end_index` stay unchanged; context is stored separately in the `chunk.context` field.
+
+### In a Pipeline
+
+```python
+from chonkie import Pipeline
+
+docs = (Pipeline()
+    .chunk_with("recursive", chunk_size=512)
+    .refine_with("overlap", context_size=0.25, method="suffix")
+    .refine_with("embeddings", embedding_model="openai:text-embedding-3-small")
+    .run(texts=documents)
+)
+```
 
 ## Embeddings
 

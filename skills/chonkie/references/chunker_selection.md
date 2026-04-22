@@ -50,17 +50,33 @@ If chunks must be exactly ≤ N tokens for an LLM context window:
 → `TokenChunker` with `chunk_size=N` guarantees hard limits
 → `RecursiveChunker` also respects `chunk_size` but may produce slightly smaller chunks
 
+### 5. Do you need overlap between chunks?
+
+**Only TokenChunker and SentenceChunker** have a built-in `chunk_overlap` parameter that creates actual overlapping windows at chunking time.
+
+**All other chunkers** should use `OverlapRefinery` as a post-processing step:
+```python
+from chonkie.refinery import OverlapRefinery
+
+refinery = OverlapRefinery(context_size=64, method="suffix")
+chunks = refinery(chunks)
+```
+
+Choose `method="suffix"` to append the start of the next chunk (default), or `method="prefix"` to prepend the end of the previous chunk. Set `merge=False` to keep context separate from `chunk.text`.
+
 ## Quick Reference
 
-| Chunker | Speed | Quality | Dependencies | Cost |
-|---------|-------|---------|-------------|------|
-| FastChunker | ★★★★★ | ★★ | None | Free |
-| TokenChunker | ★★★★ | ★★ | None | Free |
-| SentenceChunker | ★★★★ | ★★★ | None | Free |
-| RecursiveChunker | ★★★★ | ★★★★ | None | Free |
-| CodeChunker | ★★★ | ★★★★ | tree-sitter | Free |
-| SemanticChunker | ★★ | ★★★★ | embedding model | Free/API |
-| LateChunker | ★★ | ★★★★★ | embedding model | Free/API |
-| NeuralChunker | ★★ | ★★★★ | torch, transformers | Free |
-| SlumberChunker | ★ | ★★★★★ | LLM API | API cost |
-| TableChunker | ★★★ | ★★★ | pandas | Free |
+| Chunker | Speed | Quality | Built-in Overlap | Dependencies | Cost |
+|---------|-------|---------|-----------------|-------------|------|
+| FastChunker | ★★★★★ | ★★ | No | None | Free |
+| TokenChunker | ★★★★ | ★★ | Yes (int/float) | None | Free |
+| SentenceChunker | ★★★★ | ★★★ | Yes (int) | None | Free |
+| RecursiveChunker | ★★★★ | ★★★★ | No | None | Free |
+| CodeChunker | ★★★ | ★★★★ | No | tree-sitter | Free |
+| SemanticChunker | ★★ | ★★★★ | No | embedding model | Free/API |
+| LateChunker | ★★ | ★★★★★ | No | embedding model | Free/API |
+| NeuralChunker | ★★ | ★★★★ | No | torch, transformers | Free |
+| SlumberChunker | ★ | ★★★★ | No | LLM API | API cost |
+| TableChunker | ★★★ | ★★★ | No | pandas | Free |
+
+All chunkers without built-in overlap support `OverlapRefinery` for post-chunking context.
