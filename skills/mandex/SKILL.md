@@ -7,7 +7,7 @@ metadata:
   version: "0.1.11"
   category: developer-tools
   repository: https://github.com/chonkie-inc/mandex
-compatibility: Single static Rust binary. No runtime dependencies. Supports macOS, Linux, Windows. Optional ONNX reranking requires model download on first run (~50MB).
+compatibility: Single static Rust binary. No runtime dependencies. Supports macOS, Linux, Windows. Optional ONNX reranking requires one-time model download (~50MB).
 ---
 
 # Mandex — Offline Documentation Packages for AI Agents
@@ -27,13 +27,9 @@ Use this skill when users want to:
 ## Installation
 
 ```bash
-# Recommended
-curl -fsSL https://mandex.dev/install.sh | sh
-
-# With Cargo
+# Recommended: With Cargo
 cargo install mandex
-
-# From source
+# Build from source
 git clone https://github.com/chonkie-inc/mandex.git
 cd mandex && cargo build --release
 ```
