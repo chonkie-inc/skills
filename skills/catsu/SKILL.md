@@ -254,7 +254,7 @@ except MissingApiKeyError as e:
 response = client.embed(
     model="openai:text-embedding-3-small",
     input="hello",
-    api_key="sk-different-key-for-this-request",
+    api_key="sk-...",
 )
 ```
 
