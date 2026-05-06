@@ -1,6 +1,6 @@
 # Chonkie Skills
 
-Agent Skills for text chunking, offline documentation search, and unified embeddings built for Claude Code, Cursor, Gemini CLI, and other AI coding agents.
+Agent Skills for text chunking, offline documentation search, and unified embeddings — built for Claude Code, Cursor, Gemini CLI, Codex, and other AI coding agents.
 
 ## Skills
 
@@ -12,51 +12,64 @@ Agent Skills for text chunking, offline documentation search, and unified embedd
 
 ## Installation
 
-### Claude Code
+### Skills (via `npx skills`)
 
 ```bash
-claude install github:chonk-lain/skills
+# Claude Code
+npx skills add chonkie-inc/skills
+
+# Cursor
+npx skills add chonkie-inc/skills --cursor
+
+# Gemini CLI
+npx skills add chonkie-inc/skills --gemini
+
+# OpenAI Codex
+npx skills add chonkie-inc/skills --codex
+
+# VS Code / GitHub Copilot
+npx skills add chonkie-inc/skills --vscode
 ```
 
-### Cursor
+### Plugins (native integration)
 
-Install as a Cursor plugin from the `.cursor-plugin/` directory.
+#### Claude Code
 
-### Gemini CLI
+```bash
+claude plugin add github:chonkie-inc/skills
+```
 
-Reference `gemini-extension.json` in your Gemini CLI configuration.
+This registers the `.claude-plugin/` manifest, which maps all three skills automatically.
+
+#### Cursor
+
+Copy `.cursor-plugin/` into your project root, or symlink it:
+
+```bash
+ln -s path/to/skills/.cursor-plugin .cursor-plugin
+```
+
+Cursor will detect the plugin on next restart.
+
+#### Gemini CLI
+
+Add to your `~/.gemini/settings.json`:
+
+```json
+{
+  "extensions": [
+    { "path": "path/to/skills/gemini-extension.json" }
+  ]
+}
+```
 
 ### Manual
 
-Clone this repo and point your agent's skill/plugin path at the `skills/` directory.
-
-## Repository Structure
-
+```bash
+git clone https://github.com/chonkie-inc/skills.git
 ```
-skills/
-├── .claude-plugin/          # Claude Code plugin manifest
-│   ├── plugin.json
-│   └── marketplace.json
-├── .cursor-plugin/          # Cursor plugin manifest
-│   ├── plugin.json
-│   └── marketplace.json
-├── agents/
-│   └── AGENTS.md            # Fallback agent instructions
-├── skills/
-│   ├── chonkie/             # Chonkie chunking skill
-│   │   ├── SKILL.md
-│   │   ├── references/
-│   │   └── scripts/
-│   ├── mandex/              # Mandex documentation skill
-│   │   ├── SKILL.md
-│   │   └── references/
-│   └── catsu/               # Catsu embeddings skill
-│       ├── SKILL.md
-│       └── references/
-├── gemini-extension.json    # Gemini CLI extension
-├── LICENSE
-└── README.md
-```
+
+Then point your agent's skill/plugin path at the `skills/` directory.
 
 ## Related Projects
 
