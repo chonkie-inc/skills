@@ -33,34 +33,15 @@ npx skills add chonkie-inc/skills --vscode
 
 ### Plugins (native integration)
 
-#### Claude Code
-
 ```bash
-claude plugin add github:chonkie-inc/skills
-```
+# Claude Code
+/plugin marketplace add chonkie-inc/skills
 
-This registers the `.claude-plugin/` manifest, which maps all three skills automatically.
+# Cursor — add to .cursor/settings.json
+# { "plugins": ["chonkie-inc/skills"] }
 
-#### Cursor
-
-Copy `.cursor-plugin/` into your project root, or symlink it:
-
-```bash
-ln -s path/to/skills/.cursor-plugin .cursor-plugin
-```
-
-Cursor will detect the plugin on next restart.
-
-#### Gemini CLI
-
-Add to your `~/.gemini/settings.json`:
-
-```json
-{
-  "extensions": [
-    { "path": "path/to/skills/gemini-extension.json" }
-  ]
-}
+# Gemini CLI — add to ~/.gemini/settings.json
+# { "extensions": ["github:chonkie-inc/skills"] }
 ```
 
 ### Manual
