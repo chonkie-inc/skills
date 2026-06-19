@@ -43,17 +43,17 @@ pip install catsu
 Set environment variables for the providers you use:
 
 ```bash
-export OPENAI_API_KEY="sk-..."
-export VOYAGE_API_KEY="pa-..."
-export COHERE_API_KEY="..."
-export JINA_API_KEY="jina_..."
-export MISTRAL_API_KEY="..."
-export GOOGLE_API_KEY="..."        # or GEMINI_API_KEY
-export TOGETHER_API_KEY="..."
-export MIXEDBREAD_API_KEY="..."
-export NOMIC_API_KEY="..."
-export DEEPINFRA_API_KEY="..."
-export CLOUDFLARE_API_TOKEN="..."  # + CLOUDFLARE_ACCOUNT_ID
+export OPENAI_API_KEY=<your-openai-key>
+export VOYAGE_API_KEY=<your-voyage-key>
+export COHERE_API_KEY=<your-cohere-key>
+export JINA_API_KEY=<your-jina-key>
+export MISTRAL_API_KEY=<your-mistral-key>
+export GOOGLE_API_KEY=<your-google-key>        # or GEMINI_API_KEY
+export TOGETHER_API_KEY=<your-together-key>
+export MIXEDBREAD_API_KEY=<your-mixedbread-key>
+export NOMIC_API_KEY=<your-nomic-key>
+export DEEPINFRA_API_KEY=<your-deepinfra-key>
+export CLOUDFLARE_API_TOKEN=<your-cloudflare-token>  # + CLOUDFLARE_ACCOUNT_ID
 ```
 
 Only the keys for providers you actually call are required.
@@ -251,10 +251,12 @@ except MissingApiKeyError as e:
 ### Per-request API key override
 
 ```python
+import os
+
 response = client.embed(
     model="openai:text-embedding-3-small",
     input="hello",
-    api_key="sk-...",
+    api_key=os.environ["ALTERNATE_OPENAI_KEY"],
 )
 ```
 
